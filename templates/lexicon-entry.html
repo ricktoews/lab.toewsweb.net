@@ -1,0 +1,3 @@
+    <tr ng-repeat="record in records | orderBy: 'word'  track by $index " ng-click="getWord(record)">
+      <td uib-popover="{{record.definition}}" popover-trigger="'mouseenter'">{{record.word}}</td>
+    </tr>

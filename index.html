@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html ng-app="Dictionary">
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <title>Dictionary</title>
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/lodash/4.14.1/lodash.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.0.1/ui-bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.0.1/ui-bootstrap-tpls.min.js"></script>
+
+  <style type="text/css">
+  body {
+    padding-top: 70px;
+    padding-bottom: 30px;
+  }
+
+  .theme-dropdown .dropdown-menu {
+    position: static;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .theme-showcase > p > .btn {
+    margin: 5px 0;
+  }
+
+  .theme-showcase .navbar .container {
+    width: auto;
+  }
+  </style>
+
+  <script>
+    angular.module('Dictionary', ['ui.router', 'ui.bootstrap'])
+
+		// config block
+		.config(function($stateProvider, $locationProvider, $urlRouterProvider) {
+			$locationProvider.html5Mode(true);
+			$stateProvider
+				.state('index',  {
+					url: '/',
+					controller: 'MainCtrl',
+					templateUrl: 'templates/main.html'
+				})
+				.state('words',  {
+					url: '/words/:start',
+					controller: 'WordsCtrl',
+					templateUrl: 'templates/words.html'
+				});
+
+				$urlRouterProvider.otherwise('/');
+		})
+
+
+		// controller block
+		// MainCtrl
+		.controller('MainCtrl', function($scope, $state) {
+			$scope.startswith = '';
+
+			$scope.getWords = function() {
+				if ($scope.startswith.length) {
+					$state.go('words', { start: $scope.startswith });
+				}
+			}
+		})
+
+
+		// WordsCtrl
+		.controller('WordsCtrl', function($scope, $state, LexHelper) {
+			$scope.startswith = $state.params.start;
+			$scope.records = [];
+
+			LexHelper.get($scope.startswith).then(function(data) {
+				$scope.records = data;
+			});
+		})
+
+
+		// directive block
+		.directive('lexHeading', function() {
+			function link(scope, el, attr) {
+			}
+
+			return {
+				templateUrl: './templates/lex-heading.html',
+				link: link
+			};			
+		})
+
+		.directive('wordList', function() {
+			function link(scope, el, attr) {
+				scope.popoverTemplate = './templates/words-definition.html';
+			}
+
+			return {
+				scope: {
+					lexData: '=records'
+				},
+				templateUrl: './templates/word-list.html',
+				link: link
+			}
+		})
+
+		.directive('entry', function() {
+			function link(scope, el, attr) {
+				scope.popoverTemplate = './templates/words-definition.html';
+			}
+
+			return {
+				template: '',
+				link: link
+			};
+		})
+
+
+		// service block
+		// Where model is called.
+		.factory('LexHelper', function(LexModel) {
+			var lh = {};
+
+			lh.get = function(startswith) {
+				return LexModel.get(startswith);
+			};
+
+			lh.getWord = function(word) {
+				return LexModel.getWord(word);
+			};
+
+			return lh;
+		})
+
+		// Model: Where REST is actually performed.
+		.factory('LexModel', function($http) {
+			var model = {};
+
+			model.get = function(startswith) {
+				var url = 'http://rest.toewsweb.net/index.php/wordlist/' + startswith;
+				return $http.get(url, { cache: false }).then(function(result) {
+					var words = _.map(result.data, function(item) { return JSON.parse(item); });
+					return words;
+				});
+			};
+
+			model.getWord = function(word) {
+				var url = 'http://rest.toewsweb.net/index.php/word/' + word;
+				return $http.get(url, { cache: false }).then(function(result) {
+					return result.data;
+				});
+			};
+
+			return model;
+		});
+  </script>
+</head>
+<body>
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Bootstrap theme</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+<div class="container">
+<ui-view></ui-view>
+</div>
+
+</div>
+</body>
+</html>
