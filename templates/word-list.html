@@ -1,7 +1,7 @@
 <table>
   <tbody>
     <tr ng-repeat="record in lexData | orderBy: 'word'  track by $index " ng-click="getWord(record)">
-      <td uib-popover-template="popoverTemplate" entry="{{record}}" popover-trigger="'mouseenter'">{{record.word}}</td>
+      <td uib-popover-template="popoverTemplate" popover-trigger="'click'">{{record.word}}</td>
     </tr>
   </tbody>
 </table>
