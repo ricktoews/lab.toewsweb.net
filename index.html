@@ -39,7 +39,7 @@
     width: auto;
   }
   </style>
-
+  <link rel="stylesheet" href="game.css"></link>
   <script>
     angular.module('Dictionary', ['ui.router', 'ui.bootstrap'])
 
@@ -105,14 +105,22 @@
 				.then(function (data) {
 					$scope.items = data;
 				});
+
 		})
 
 
 		// directive block
+		.directive('gameRow', function() {
+			return {
+				templateUrl: './templates/game-row.html'
+			};
+		})
+
 		.directive('gameKey', function($document) {
 			
 			function link(scope, element, attrs) {
 				var startX = 0, startY = 0, x = 0, y = 0;
+				var selectedWord;
 
 				 element.css({
 					position: 'relative',
@@ -120,7 +128,10 @@
 				});
 
 				element.on('mousedown', function(evt) {
-//					evt.preventDefault(); // Why is this needed?
+					evt.preventDefault(); 
+					selectedWord = scope.item.word;
+console.log('mousedown, selectedWord', selectedWord);
+					scope.selectedword = selectedWord;
 					startX = evt.pageX - x;
 					startY = evt.pageY - y;
 					$document.on('mousemove', mousemove);
@@ -128,6 +139,9 @@
 				});
 
 				function mousemove(evt) {
+					var elLeft = evt.pageX - evt.offsetX;
+					var elTop = evt.pageY - evt.offsetY;
+
 					x = evt.pageX - startX;
 					y = evt.pageY - startY;
 					element.css({
@@ -144,7 +158,7 @@
 
 			return {
 				restrict: 'E',
-				template: '<span class="btn btn-primary" ng-bind="item.word"></span>',
+				template: '<span class="game-word" ng-bind="item.word"></span>',
 				link: link
 			};
 		})
@@ -152,7 +166,7 @@
 		.directive('gameValue', function() {
 			return {
 				restrict: 'E',
-				template: '<div class="btn btn-info" ng-bind="item.definition"></div>'
+				template: '<div class="game-definition" ng-bind="item.definition"></div>'
 			};
 		})
 

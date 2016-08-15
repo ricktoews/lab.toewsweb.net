@@ -1,12 +1,11 @@
 <h1>Game</h1>
 
 <div class="container">
+  <game-row ng-repeat="item in items" item="item"></game-row>
   <div class="row">
-    <div class="col-md-6">
-      <game-key ng-repeat="item in items"></game-key>
-    </div>
-    <div class="col-md-6">
-      <game-value ng-repeat="item in items"></game-value>
+    <div class="col-md-12">
+      Selected word: <input type="text" ng-model="selectedword" ng-bind="selectedword">
     </div>
   </div>
 </div>
+

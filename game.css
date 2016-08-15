@@ -1,0 +1,15 @@
+.game-word {
+	border: 1px solid green;
+	padding: 10px;
+	border-radius: 10px;
+	background-color:#0dd;
+	color: white;
+}
+
+.game-definition {
+	border: 1px solid blue;
+	padding: 10px;
+	border-radius: 10px;
+	background-color: #09f;
+	color: white;
+}
